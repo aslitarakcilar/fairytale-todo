@@ -1,6 +1,6 @@
 export type Priority = 'low' | 'medium' | 'high';
 
-export type TaskView = 'all' | 'today' | 'upcoming' | 'completed' | 'overdue';
+export type TaskView = 'all' | 'today' | 'upcoming' | 'completed' | 'overdue' | 'calendar';
 
 export type CompletionFilter = 'all' | 'completed' | 'pending';
 
@@ -16,6 +16,7 @@ export interface Task {
   dueTime?: string;
   createdAt: string;
   updatedAt: string;
+  completedAt?: string;
   completed: boolean;
 }
 

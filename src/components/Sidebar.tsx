@@ -1,6 +1,7 @@
 import clsx from 'clsx';
 import {
   CalendarDays,
+  CalendarRange,
   CheckCheck,
   Clock3,
   LayoutDashboard,
@@ -20,6 +21,7 @@ const items: Array<{ key: TaskView; label: string; icon: LucideIcon }> = [
   { key: 'all', label: 'Tüm Görevler', icon: ListChecks },
   { key: 'today', label: 'Bugün', icon: CalendarDays },
   { key: 'upcoming', label: 'Yaklaşan', icon: Clock3 },
+  { key: 'calendar', label: 'Takvim', icon: CalendarRange },
   { key: 'completed', label: 'Tamamlanan', icon: CheckCheck },
   { key: 'overdue', label: 'Geciken', icon: TriangleAlert },
 ];

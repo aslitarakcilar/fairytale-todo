@@ -9,9 +9,13 @@ Görevler Supabase'de saklandığı için telefondan ve bilgisayardan aynı hesa
 - Üyelik ve giriş (Supabase Auth)
 - Kullanıcıya özel görevler (RLS ile izole)
 - Görev CRUD (ekle, düzenle, sil, tamamla)
-- Görünümler: Tüm Görevler, Bugün, Yaklaşan, Tamamlanan, Geciken
+- Görünümler: Tüm Görevler, Bugün, Yaklaşan, Tamamlanan, Geciken, Takvim
+- Gelişmiş istatistik paneli: streak, 7 günlük trend, odak saati
 - Arama, filtreleme, sıralama
 - localStorage önbellek + bulut kalıcılığı
+- Sentry hata izleme (opsiyonel)
+- Web Vitals performans ölçümü (dev console)
+- Vitest ile utility testleri
 - Mobil ve masaüstü uyumlu
 
 ## 1) Supabase Kurulumu
@@ -70,6 +74,12 @@ VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
 VITE_SUPABASE_TASKS_TABLE=tasks
 ```
 
+Opsiyonel Sentry:
+
+```bash
+VITE_SENTRY_DSN=YOUR_SENTRY_DSN
+```
+
 ## 3) Lokal Çalıştırma
 
 ```bash
@@ -83,32 +93,26 @@ Telefondan aynı ağda test için:
 npm run dev:network
 ```
 
-## 4) Yayına Alma (Vercel)
+## 4) Test ve Build
+
+```bash
+npm run test
+npm run build
+```
+
+## 5) Yayına Alma (Vercel)
 
 1. Kodu GitHub'a yükle.
 2. Vercel'de "Add New Project" ile repo'yu seç.
 3. Build command: `npm run build`
 4. Output: `dist`
-5. Environment Variables olarak `.env` içindeki 3 değeri Vercel'e ekle.
+5. Environment Variables olarak `.env` içindeki değerleri Vercel'e ekle.
 6. Deploy et.
-
-Bu şekilde link herkese açık olur, ama kullanıcılar giriş yapmadan görev göremez.
-Her kullanıcı kendi hesabının verisini görür.
-
-## 5) GitHub'a Yükleme
-
-```bash
-git init
-git add .
-git commit -m "FairyTale To-Do with auth and per-user cloud tasks"
-git branch -M main
-git remote add origin <REPO_URL>
-git push -u origin main
-```
 
 ## Proje Yapısı
 
 - `src/components`: UI bileşenleri
 - `src/hooks`: `useAuth`, `useTasks`
-- `src/utils`: Supabase istemcisi ve yardımcılar
+- `src/utils`: görev/date helper'ları ve Supabase istemcisi
+- `src/monitoring`: Sentry + Web Vitals
 - `src/types`: TypeScript tipleri

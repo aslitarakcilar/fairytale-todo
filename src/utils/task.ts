@@ -1,4 +1,10 @@
-import { compareAsc, parseISO } from 'date-fns';
+import {
+  compareAsc,
+  format,
+  parseISO,
+  startOfDay,
+  subDays,
+} from 'date-fns';
 import {
   Priority,
   SortOption,
@@ -34,6 +40,8 @@ export const filterByView = (tasks: Task[], view: TaskView): Task[] => {
       return tasks.filter((task) => task.completed);
     case 'overdue':
       return tasks.filter((task) => isTaskOverdue(task));
+    case 'calendar':
+      return tasks;
     default:
       return tasks;
   }
@@ -89,4 +97,53 @@ export const categoriesFromTasks = (tasks: Task[]): string[] => {
   });
 
   return [...categories].sort((a, b) => a.localeCompare(b));
+};
+
+export const getCompletionStreak = (tasks: Task[]): number => {
+  const completedDays = new Set(
+    tasks
+      .filter((task) => task.completedAt)
+      .map((task) => startOfDay(parseISO(task.completedAt as string)).toISOString())
+  );
+
+  let streak = 0;
+  let cursor = startOfDay(new Date());
+
+  while (completedDays.has(cursor.toISOString())) {
+    streak += 1;
+    cursor = subDays(cursor, 1);
+  }
+
+  return streak;
+};
+
+export const getWeeklyCompletionTrend = (tasks: Task[]) => {
+  const days = Array.from({ length: 7 }).map((_, index) => subDays(startOfDay(new Date()), 6 - index));
+
+  return days.map((day) => {
+    const count = tasks.filter((task) => {
+      if (!task.completedAt) return false;
+      return startOfDay(parseISO(task.completedAt)).getTime() === day.getTime();
+    }).length;
+
+    return {
+      label: format(day, 'EEE'),
+      count,
+    };
+  });
+};
+
+export const getFocusHour = (tasks: Task[]): string => {
+  const hourCount = new Map<string, number>();
+
+  tasks.forEach((task) => {
+    if (!task.dueTime) return;
+    const hour = task.dueTime.split(':')[0];
+    hourCount.set(hour, (hourCount.get(hour) ?? 0) + 1);
+  });
+
+  if (hourCount.size === 0) return 'Saat verisi yok';
+
+  const [bestHour] = [...hourCount.entries()].sort((a, b) => b[1] - a[1])[0];
+  return `${bestHour}:00`;
 };

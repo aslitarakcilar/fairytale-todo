@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import { AuthPanel } from './components/AuthPanel';
+import { AdvancedInsights } from './components/AdvancedInsights';
 import { Sidebar } from './components/Sidebar';
 import { ProgressWidget } from './components/ProgressWidget';
 import { StatsCards } from './components/StatsCards';
+import { TaskCalendar } from './components/TaskCalendar';
 import { TaskControls } from './components/TaskControls';
 import { TaskList } from './components/TaskList';
 import { TaskModal } from './components/TaskModal';
@@ -15,7 +17,10 @@ import {
   applyTaskFilters,
   categoriesFromTasks,
   filterByView,
+  getCompletionStreak,
+  getFocusHour,
   getTaskStats,
+  getWeeklyCompletionTrend,
   sortTasks,
 } from './utils/task';
 
@@ -31,6 +36,7 @@ const viewTitles: Record<TaskView, string> = {
   upcoming: 'Yaklaşan',
   completed: 'Tamamlanan',
   overdue: 'Geciken',
+  calendar: 'Takvim',
 };
 
 function App() {
@@ -64,6 +70,7 @@ function App() {
       all: filterByView(tasks, 'all').length,
       today: filterByView(tasks, 'today').length,
       upcoming: filterByView(tasks, 'upcoming').length,
+      calendar: filterByView(tasks, 'calendar').length,
       completed: filterByView(tasks, 'completed').length,
       overdue: filterByView(tasks, 'overdue').length,
     }),
@@ -88,6 +95,10 @@ function App() {
     if (!candidate) return 'Bekleyen görev kalmadı. Tempoyu koruyup sakinliğin keyfini çıkar.';
     return `${candidate.title} görevi bugünün ana odağı olmalı.`;
   }, [tasks]);
+
+  const completionStreak = useMemo(() => getCompletionStreak(tasks), [tasks]);
+  const weeklyTrend = useMemo(() => getWeeklyCompletionTrend(tasks), [tasks]);
+  const focusHour = useMemo(() => getFocusHour(tasks), [tasks]);
 
   const openCreate = () => {
     setEditingTask(undefined);
@@ -173,6 +184,7 @@ function App() {
                 />
 
                 <ProgressWidget completionRate={completionRate} focusText={focusText} />
+                <AdvancedInsights streak={completionStreak} trend={weeklyTrend} focusHour={focusHour} />
               </>
             )}
           </section>
@@ -185,7 +197,11 @@ function App() {
             onSortChange={setSortBy}
           />
 
-          <TaskList tasks={visibleTasks} onToggle={(id) => void toggleTask(id)} onEdit={openEdit} onDelete={(id) => void deleteTask(id)} />
+          {view === 'calendar' ? (
+            <TaskCalendar tasks={visibleTasks} />
+          ) : (
+            <TaskList tasks={visibleTasks} onToggle={(id) => void toggleTask(id)} onEdit={openEdit} onDelete={(id) => void deleteTask(id)} />
+          )}
         </main>
       </div>
 

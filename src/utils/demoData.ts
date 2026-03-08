@@ -57,6 +57,7 @@ export const demoTasks: Task[] = [
     dueTime: '10:00',
     createdAt: subDays(new Date(), 5).toISOString(),
     updatedAt: subDays(new Date(), 5).toISOString(),
+    completedAt: subDays(new Date(), 2).toISOString(),
     completed: true,
   },
 ];
