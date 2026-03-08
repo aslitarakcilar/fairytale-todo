@@ -22,6 +22,7 @@ interface RemoteTaskRow {
 const normalizeTask = (task: Task): Task => ({
   ...task,
   updatedAt: task.updatedAt ?? task.createdAt,
+  completedAt: task.completedAt ?? (task.completed ? task.updatedAt : undefined),
 });
 
 const isValidTaskArray = (value: unknown): value is Task[] => {
@@ -67,6 +68,7 @@ const remoteToTask = (row: RemoteTaskRow): Task => ({
   dueTime: row.due_time ?? undefined,
   createdAt: row.created_at,
   updatedAt: row.updated_at,
+  completedAt: row.completed ? row.updated_at : undefined,
   completed: row.completed,
 });
 
@@ -203,6 +205,7 @@ export const useTasks = (userId?: string) => {
       dueTime: input.dueTime || undefined,
       createdAt: now,
       updatedAt: now,
+      completedAt: undefined,
       completed: false,
     };
 
@@ -252,7 +255,13 @@ export const useTasks = (userId?: string) => {
       prev.map((task) => {
         if (task.id !== id) return task;
 
-        updated = { ...task, completed: !task.completed, updatedAt: now };
+        const nextCompleted = !task.completed;
+        updated = {
+          ...task,
+          completed: nextCompleted,
+          updatedAt: now,
+          completedAt: nextCompleted ? now : undefined,
+        };
         return updated;
       })
     );
@@ -296,7 +305,22 @@ export const useTasks = (userId?: string) => {
     }
 
     const remoteTasks = ((data ?? []) as RemoteTaskRow[]).map(remoteToTask);
-    setTasks(remoteTasks);
+    const merged = mergeTasks(tasks, remoteTasks);
+    setTasks(merged);
+
+    if (merged.length > 0) {
+      const payload = merged.map((task) => taskToRemote(task, userId));
+      const { error: syncError } = await supabase
+        .from(TASKS_TABLE)
+        .upsert(payload, { onConflict: 'id' });
+
+      if (syncError) {
+        setError('Yenileme sonrası bulut eşitleme sırasında sorun oluştu.');
+        setLoading(false);
+        return;
+      }
+    }
+
     setError(null);
     setLoading(false);
   };
