@@ -8,6 +8,8 @@
     "dev:network": "vite --host 0.0.0.0 --port 5173",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
+    "verify": "npm run test && npm run build",
+    "release:prod": "bash ./scripts/release.sh",
     "test": "vitest run",
     "test:watch": "vitest"
   },
